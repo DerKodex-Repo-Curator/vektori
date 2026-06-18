@@ -990,7 +990,11 @@ class FactExtractor:
 
             try:
                 episode_id = await self.db.insert_episode(
-                    text, embedding, user_id, agent_id, session_id,
+                    text,
+                    embedding,
+                    user_id,
+                    agent_id,
+                    session_id,
                     event_time=session_time,
                 )
                 for fid in linked_ids:
@@ -1104,7 +1108,11 @@ class FactExtractor:
 
             try:
                 episode_id = await self.db.insert_episode(
-                    text, embedding, user_id, agent_id, session_id,
+                    text,
+                    embedding,
+                    user_id,
+                    agent_id,
+                    session_id,
                     event_time=session_time,
                 )
                 for fid in linked_ids:
@@ -1208,7 +1216,9 @@ def _parse_json_response(response: str) -> dict[str, Any]:
         except json.JSONDecodeError:
             continue
 
-    logger.error("Failed to parse extraction JSON: %s\nResponse: %.500s", "no valid JSON found", response)
+    logger.error(
+        "Failed to parse extraction JSON: %s\nResponse: %.500s", "no valid JSON found", response
+    )
     return {"facts": []}
 
 
