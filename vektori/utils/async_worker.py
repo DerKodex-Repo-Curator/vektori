@@ -155,7 +155,30 @@ class ExtractionWorker:
         await asyncio.gather(*[_extract_one(r) for r in buf.requests])
 
     async def shutdown(self, timeout: float = 30.0) -> None:
-        """Cancel pending timers and wait for any in-flight tasks."""
+        """Drain buffered extractions, then cancel pending timers and clear state."""
+        # Collect keys with buffered-but-not-yet-fired requests before touching timers
+        keys_to_drain = [k for k, buf in self._buffers.items() if buf.requests]
+
+        # Cancel timers for those keys first so _debounced_process can't double-fire
+        for key in keys_to_drain:
+            t = self._timers.get(key)
+            if t and not t.done():
+                t.cancel()
+
+        # Drain remaining buffers under the existing concurrency semaphore
+        if keys_to_drain:
+            try:
+                await asyncio.wait_for(
+                    asyncio.gather(
+                        *[self._process(key) for key in keys_to_drain],
+                        return_exceptions=True,
+                    ),
+                    timeout=timeout,
+                )
+            except asyncio.TimeoutError:
+                logger.warning("Extraction worker shutdown timed out while draining buffers")
+
+        # Cancel any remaining timers (e.g. in-flight tasks not in keys_to_drain)
         pending = [t for t in self._timers.values() if not t.done()]
         for t in pending:
             t.cancel()
@@ -166,6 +189,6 @@ class ExtractionWorker:
                     timeout=timeout,
                 )
             except asyncio.TimeoutError:
-                logger.warning("Extraction worker shutdown timed out")
+                logger.warning("Extraction worker shutdown timed out waiting for in-flight tasks")
         self._buffers.clear()
         self._timers.clear()
