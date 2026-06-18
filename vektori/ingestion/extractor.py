@@ -886,10 +886,10 @@ class FactExtractor:
             if not same_session and sim > 0.90:
                 return (best["id"], False)
 
-            # Contradiction LLM check — use low threshold (0.30) so antonym-space
-            # contradictions ("dark mode" vs "light mode") reach the LLM even when
-            # embedding similarity is low.
-            plausible_conflicts = [c for c in candidates if (1.0 - c.get("distance", 1.0)) > 0.30]
+            # Contradiction LLM check — 0.50 keeps enough semantic overlap to catch
+            # antonym-space contradictions ("dark mode" vs "light mode") without
+            # firing an O(N) LLM call for every weakly related fact.
+            plausible_conflicts = [c for c in candidates if (1.0 - c.get("distance", 1.0)) > 0.50]
             if plausible_conflicts:
                 facts_text = "\n".join(f"- [{c['id']}] {c['text']}" for c in plausible_conflicts)
                 prompt = CONTRADICTION_PROMPT.format(fact_text=fact_text, existing_facts=facts_text)

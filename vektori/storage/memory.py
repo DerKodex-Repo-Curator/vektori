@@ -196,9 +196,9 @@ class MemoryBackend(StorageBackend):
             if f.get("embedding") is None:
                 continue
             et = f.get("event_time")
-            if before_date and et and et > before_date:
+            if before_date and (et is None or et > before_date):
                 continue
-            if after_date and et and et < after_date:
+            if after_date and (et is None or et < after_date):
                 continue
             sim = _cosine_similarity(embedding, f["embedding"])
             results.append({**f, "distance": 1.0 - sim})

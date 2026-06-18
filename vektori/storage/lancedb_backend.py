@@ -358,9 +358,9 @@ class LanceDBBackend(StorageBackend):
         if subject is not None:
             where += f" AND subject = '{_esc(subject)}'"
         if before_date is not None:
-            where += f" AND event_time <= '{before_date.isoformat()}'"
+            where += f" AND event_time != '' AND event_time <= '{before_date.isoformat()}'"
         if after_date is not None:
-            where += f" AND event_time >= '{after_date.isoformat()}'"
+            where += f" AND event_time != '' AND event_time >= '{after_date.isoformat()}'"
 
         rows = await self._facts_tbl.vector_search(embedding).where(where).limit(limit).to_list()
         return [_row_to_fact(r) for r in rows]

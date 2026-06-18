@@ -280,9 +280,9 @@ class VecLiteBackend(StorageBackend):
                 if active_only and not f.get("is_active", True):
                     continue
                 et = f.get("event_time")
-                if before_date and et and et > before_date:
+                if before_date and (et is None or et > before_date):
                     continue
-                if after_date and et and et < after_date:
+                if after_date and (et is None or et < after_date):
                     continue
                 results.append({**f, "distance": 1.0 - sim})
                 if len(results) >= limit:
