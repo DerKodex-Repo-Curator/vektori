@@ -601,6 +601,10 @@ class SQLiteBackend(StorageBackend):
         await self._conn.commit()
         return synthesis_id
 
+    async def deactivate_synthesis(self, synthesis_id: str) -> None:
+        await self._conn.execute("UPDATE syntheses SET is_active = 0 WHERE id = ?", (synthesis_id,))
+        await self._conn.commit()
+
     async def insert_synthesis_fact(self, synthesis_id: str, fact_id: str) -> None:
         await self._conn.execute(
             "INSERT OR IGNORE INTO synthesis_facts (synthesis_id, fact_id) VALUES (?, ?)",

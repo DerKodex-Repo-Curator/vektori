@@ -700,14 +700,20 @@ class FactExtractor:
                 )
 
                 if dedup is not None:
-                    existing_id, same_session = dedup
+                    existing_id, same_session, existing_event_time = dedup
                     if same_session:
                         # Pure dedup: same conversation, skip insert — do NOT
                         # increment mentions (within-session repetition ≠ importance)
                         continue
-                    # Cross-session near-dup: the newer fact supersedes the older one.
-                    # Insert the new fact (below), then deactivate the old one with a
-                    # superseded_by pointer so it's excluded from default active_only queries.
+                    # Cross-session near-dup: respect event_time ordering.
+                    # If the new session's event_time is earlier than the existing fact's,
+                    # we're ingesting out of order — skip: the existing fact is the newer one.
+                    if (
+                        session_time is not None
+                        and existing_event_time is not None
+                        and session_time < existing_event_time
+                    ):
+                        continue
 
                 # Carry temporal expression and source role in metadata
                 meta: dict[str, Any] = {}
@@ -731,7 +737,7 @@ class FactExtractor:
                 # If this replaced a cross-session near-dup, deactivate the old fact now
                 # that we have the new fact_id to use as the superseded_by pointer.
                 if dedup is not None:
-                    old_id, _ = dedup
+                    old_id, _, _ = dedup
                     await self.db.deactivate_fact(old_id, superseded_by=fact_id)
 
                 if _inserted_facts_out is not None:
@@ -803,8 +809,15 @@ class FactExtractor:
                     fact_data["text"], fact_emb, session_id, user_id, agent_id, subject
                 )
                 if dedup is not None:
-                    existing_id, same_session = dedup
+                    existing_id, same_session, existing_event_time = dedup
                     if same_session:
+                        continue
+                    # Respect event_time ordering on replay as well.
+                    if (
+                        session_time is not None
+                        and existing_event_time is not None
+                        and session_time < existing_event_time
+                    ):
                         continue
 
                 meta = fact_data.get("metadata") or {}
@@ -823,7 +836,7 @@ class FactExtractor:
                 # Match fresh-path behaviour: deactivate the cross-session near-dup
                 # now that we have the new fact_id to use as the superseded_by pointer.
                 if dedup is not None:
-                    old_id, _ = dedup
+                    old_id, _, _ = dedup
                     await self.db.deactivate_fact(old_id, superseded_by=fact_id)
 
                 if _inserted_facts_out is not None:
@@ -855,11 +868,11 @@ class FactExtractor:
         user_id: str,
         agent_id: str | None,
         subject: str | None = None,
-    ) -> tuple[str, bool] | None:
+    ) -> tuple[str, bool, datetime | None] | None:
         """
         Check if a near-duplicate fact already exists.
 
-        Returns (existing_fact_id, is_same_session) or None.
+        Returns (existing_fact_id, is_same_session, existing_event_time) or None.
 
         Thresholds:
           - same session + sim > 0.92 → strong dedup signal (same conversation re-stating same fact)
@@ -880,11 +893,12 @@ class FactExtractor:
             best = candidates[0]
             sim = 1.0 - best.get("distance", 1.0)
             same_session = best.get("session_id") == session_id
+            existing_event_time: datetime | None = best.get("event_time")
 
             if same_session and sim > 0.92:
-                return (best["id"], True)
+                return (best["id"], True, existing_event_time)
             if not same_session and sim > 0.90:
-                return (best["id"], False)
+                return (best["id"], False, existing_event_time)
 
             # Contradiction LLM check — 0.50 keeps enough semantic overlap to catch
             # antonym-space contradictions ("dark mode" vs "light mode") without
@@ -898,7 +912,8 @@ class FactExtractor:
                     data = _parse_json_response(response)
                     supersedes_id = data.get("supersedes_id")
                     if supersedes_id and any(c["id"] == supersedes_id for c in plausible_conflicts):
-                        return (supersedes_id, False)
+                        match = next(c for c in plausible_conflicts if c["id"] == supersedes_id)
+                        return (supersedes_id, False, match.get("event_time"))
                 except Exception as e:
                     logger.debug("Contradiction check failed: %s", e)
 

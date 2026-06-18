@@ -125,7 +125,8 @@ def score_and_rank(
         else:
             source_weight = user_source_weight
 
-        score = similarity * recency * mentions_boost * source_weight
+        confidence = max(0.0, min(1.0, float(fact.get("confidence") or 1.0)))
+        score = similarity * recency * mentions_boost * source_weight * confidence
 
         scored.append(
             {

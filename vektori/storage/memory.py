@@ -351,6 +351,10 @@ class MemoryBackend(StorageBackend):
             }
         return synthesis_id
 
+    async def deactivate_synthesis(self, synthesis_id: str) -> None:
+        if synthesis_id in self._syntheses:
+            self._syntheses[synthesis_id]["is_active"] = False
+
     async def insert_synthesis_fact(self, synthesis_id: str, fact_id: str) -> None:
         # Dedup: don't add the same link twice
         for link in self._synthesis_facts:

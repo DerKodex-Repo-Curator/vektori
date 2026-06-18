@@ -228,6 +228,9 @@ class StorageBackend(ABC):
     ) -> str:
         raise NotImplementedError()
 
+    async def deactivate_synthesis(self, synthesis_id: str) -> None:
+        raise NotImplementedError()
+
     async def insert_synthesis_fact(self, synthesis_id: str, fact_id: str) -> None:
         raise NotImplementedError()
 

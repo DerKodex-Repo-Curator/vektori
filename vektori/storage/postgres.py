@@ -620,6 +620,13 @@ class PostgresBackend(StorageBackend):
             )
         return str(synthesis_id)
 
+    async def deactivate_synthesis(self, synthesis_id: str) -> None:
+        async with self._pool.acquire() as conn:
+            await conn.execute(
+                "UPDATE syntheses SET is_active = FALSE WHERE id = $1",
+                synthesis_id,
+            )
+
     async def insert_synthesis_fact(self, synthesis_id: str, fact_id: str) -> None:
         async with self._pool.acquire() as conn:
             await conn.execute(

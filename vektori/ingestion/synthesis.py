@@ -97,16 +97,14 @@ class Synthesizer:
                 embedding=emb, user_id=user_id, agent_id=agent_id, limit=5
             )
 
-            skip = False
+            stale_id: str | None = None
             if existing:
                 best = existing[0]
                 sim = 1.0 - best.get("distance", 1.0)
                 if sim > 0.85:
-                    # We already have this synthesis, let's just skip it
-                    skip = True
-
-            if skip:
-                continue
+                    # Near-duplicate synthesis exists — deactivate the stale one and
+                    # insert the updated version so the latest aggregate is always live.
+                    stale_id = best["id"]
 
             try:
                 synthesis_id = await self.db.insert_synthesis(
@@ -118,6 +116,8 @@ class Synthesizer:
                 )
                 for fact_id in source_fact_ids:
                     await self.db.insert_synthesis_fact(synthesis_id, fact_id)
+                if stale_id:
+                    await self.db.deactivate_synthesis(stale_id)
                 inserted += 1
             except Exception as e:
                 logger.warning("Failed to insert synthesis: %s", e)

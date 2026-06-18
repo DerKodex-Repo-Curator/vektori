@@ -27,6 +27,7 @@ INSTRUCTIONS:
 1. Use only the provided context. Logical inference and reasoning from context facts is expected and correct — this is NOT guessing. Do not introduce facts that have no support in any context item.
 2. First, silently find every fact, episode, synthesis, or transcript line that directly relates to the question. Do not print this evidence list.
 3. For counting, frequency, list, "all", "total", or aggregation questions:
+   - Consider every relevant item across all sessions — do not stop at the first match.
    - Scan EVERY fact AND every episode in the context before writing anything — items may appear in either section. Count how many distinct items you find. If fewer than 3, explicitly check the Episodes section before answering.
    - Deduplicate only if the context clearly describes the same item more than once.
    - Return the complete set or total.

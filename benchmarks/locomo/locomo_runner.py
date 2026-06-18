@@ -955,7 +955,9 @@ def _format_retrieved_context(search_results: Any) -> str:
             facts,
             key=_fact_context_sort_key,
         )
-        lines.append("\n## Facts (ranked by relevance and specificity)")
+        if lines:
+            lines.append("")
+        lines.append("## Facts (ranked by relevance and specificity)")
         for i, fact in enumerate(facts, 1):
             timestamp = _timestamp_for_context(fact)
             date = _date_prefix(timestamp)
@@ -966,7 +968,9 @@ def _format_retrieved_context(search_results: Any) -> str:
 
     syntheses = search_results.get("syntheses") or []
     if syntheses:
-        lines.append("\n## Syntheses")
+        if lines:
+            lines.append("")
+        lines.append("## Syntheses")
         for i, sy in enumerate(syntheses, 1):
             timestamp = _timestamp_for_context(sy)
             date = _date_prefix(timestamp)
@@ -986,7 +990,9 @@ def _format_retrieved_context(search_results: Any) -> str:
                 session_order.append(ssid)
             session_sents[ssid].append(sent)
 
-        lines.append("\n## Session Context")
+        if lines:
+            lines.append("")
+        lines.append("## Session Context")
         for n, ssid in enumerate(session_order, 1):
             sents = session_sents[ssid]
             date_hint = ""
@@ -996,7 +1002,8 @@ def _format_retrieved_context(search_results: Any) -> str:
                     date = _date_prefix(ts)
                     date_hint = f" [{date}]" if date else ""
                     break
-            lines.append(f"\n### Session {n}{date_hint}")
+            lines.append("")
+            lines.append(f"### Session {n}{date_hint}")
             for sent in sents:
                 role = sent.get("role", "")
                 prefix = f"[{role.upper()}] " if role else ""
