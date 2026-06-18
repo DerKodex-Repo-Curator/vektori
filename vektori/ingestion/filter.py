@@ -92,15 +92,26 @@ PRONOUNS = {
 }
 
 JUNK_PATTERNS = [
-    re.compile(r"^(ok|okay|sure|yes|no|yeah|yep|nope|hmm|hm|ah|oh|uh|um|lol|haha|thanks|thank you|got it|right|cool|nice|great|fine|alright)\s*[.!?]*$", re.IGNORECASE),
+    re.compile(
+        r"^(ok|okay|sure|yes|no|yeah|yep|nope|hmm|hm|ah|oh|uh|um|lol|haha|thanks|thank you|got it|right|cool|nice|great|fine|alright)\s*[.!?]*$",
+        re.IGNORECASE,
+    ),
     re.compile(r"^(hey|hi|hello|bye|goodbye|cheers|ciao)\s*[.!?]*$", re.IGNORECASE),
     # web/social media cruft
     re.compile(r"©\s*\d{4}", re.IGNORECASE),
-    re.compile(r"(terms of service|privacy policy|cookie policy|accessibility|all rights reserved)", re.IGNORECASE),
+    re.compile(
+        r"(terms of service|privacy policy|cookie policy|accessibility|all rights reserved)",
+        re.IGNORECASE,
+    ),
     re.compile(r"^\s*(trending|trending now|what'?s happening)\s*$", re.IGNORECASE),
-    re.compile(r"^\d[\d,\.]+\s*(views|likes|retweets|replies|reposts|followers|following)\s*$", re.IGNORECASE),
+    re.compile(
+        r"^\d[\d,\.]+\s*(views|likes|retweets|replies|reposts|followers|following)\s*$",
+        re.IGNORECASE,
+    ),
     re.compile(r"^(show more|load more|see more|view more|read more)\s*[.!?]*$", re.IGNORECASE),
-    re.compile(r"(sports\s*·\s*trending|entertainment\s*·\s*trending|news\s*·\s*trending)", re.IGNORECASE),
+    re.compile(
+        r"(sports\s*·\s*trending|entertainment\s*·\s*trending|news\s*·\s*trending)", re.IGNORECASE
+    ),
     re.compile(r"^relevant\s+(people|chats|posts)\s*$", re.IGNORECASE),
     # pipe-separated nav lists (e.g. "Terms | Privacy | Cookie")
     re.compile(r"^[^|]{1,40}\|[^|]{1,40}\|", re.IGNORECASE),

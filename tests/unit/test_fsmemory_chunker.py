@@ -2,8 +2,8 @@
 
 from vektori.fsmemory.chunker import DocumentChunker, _split_with_overlap
 
-
 # ── _split_with_overlap ────────────────────────────────────────────────────
+
 
 def test_split_single_paragraph():
     result = _split_with_overlap("Just one paragraph here, nothing special.")
@@ -115,5 +115,7 @@ def test_chunk_non_md_uses_text_splitter():
 
 
 def test_chunk_path_preserved():
-    chunks = c.chunk("/home/user/notes.md", "## Title\n\nLong enough content here to pass minimum.\n")
+    chunks = c.chunk(
+        "/home/user/notes.md", "## Title\n\nLong enough content here to pass minimum.\n"
+    )
     assert all(ch.path == "/home/user/notes.md" for ch in chunks)

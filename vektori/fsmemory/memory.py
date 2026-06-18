@@ -19,12 +19,28 @@ from vektori.models.factory import create_embedder, create_llm
 logger = logging.getLogger(__name__)
 
 DEFAULT_EXCLUDES = [
-    "**/.git/**", "**/__pycache__/**", "**/*.pyc",
-    "**/node_modules/**", "**/.venv/**", "**/venv/**",
-    "**/*.db", "**/*.sqlite", "**/*.bin",
-    "**/*.jpg", "**/*.jpeg", "**/*.png", "**/*.gif", "**/*.ico",
-    "**/*.pdf", "**/*.zip", "**/*.tar.gz", "**/*.whl",
-    "**/.env", "**/*.key", "**/*.pem", "**/*.lock",
+    "**/.git/**",
+    "**/__pycache__/**",
+    "**/*.pyc",
+    "**/node_modules/**",
+    "**/.venv/**",
+    "**/venv/**",
+    "**/*.db",
+    "**/*.sqlite",
+    "**/*.bin",
+    "**/*.jpg",
+    "**/*.jpeg",
+    "**/*.png",
+    "**/*.gif",
+    "**/*.ico",
+    "**/*.pdf",
+    "**/*.zip",
+    "**/*.tar.gz",
+    "**/*.whl",
+    "**/.env",
+    "**/*.key",
+    "**/*.pem",
+    "**/*.lock",
 ]
 
 MAX_FILE_SIZE_BYTES = 200 * 1024  # 200 KB
@@ -165,7 +181,9 @@ class FilesystemMemory:
 
         root = Path(path).expanduser().resolve()
         if not root.is_dir():
-            return [IngestResult(path=str(root), chunks=0, facts_inserted=0, error="not a directory")]
+            return [
+                IngestResult(path=str(root), chunks=0, facts_inserted=0, error="not a directory")
+            ]
 
         files = [p for p in root.glob(glob) if p.is_file()][:max_files]
         results = []
@@ -174,7 +192,9 @@ class FilesystemMemory:
             if not result.skipped or result.error:
                 logger.debug(
                     "Ingested %s: %d chunks, %d facts",
-                    result.path, result.chunks, result.facts_inserted,
+                    result.path,
+                    result.chunks,
+                    result.facts_inserted,
                 )
             results.append(result)
         return results

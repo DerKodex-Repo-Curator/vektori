@@ -1087,6 +1087,21 @@ class MilvusBackend(StorageBackend):
         )
         return [self._to_fact(row) for row in hits]
 
+    async def search_facts_keyword(
+        self,
+        query: str,
+        user_id: str,
+        agent_id: str | None = None,
+        session_id: str | None = None,
+        subject: str | None = None,
+        limit: int = 10,
+        active_only: bool = True,
+        before_date: datetime | None = None,
+        after_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
+        # Milvus full-text search requires a BM25 function and sparse index; return empty list for now.
+        return []
+
     async def get_active_facts(
         self,
         user_id: str,

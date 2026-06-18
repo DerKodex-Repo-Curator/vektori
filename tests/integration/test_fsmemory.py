@@ -6,12 +6,10 @@ import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
-
 from vektori.fsmemory.memory import FilesystemMemory
 
-
 # ── helpers ────────────────────────────────────────────────────────────────
+
 
 def _make_embedder() -> MagicMock:
     embedder = MagicMock()
@@ -48,9 +46,12 @@ def _patch_models(embedder=None, llm=None):
 
 # ── add_file ───────────────────────────────────────────────────────────────
 
+
 async def test_add_file_basic(tmp_path):
     doc = tmp_path / "notes.md"
-    doc.write_text("## Architecture\n\nThe system uses a three-layer graph for memory. Facts live at L0.\n")
+    doc.write_text(
+        "## Architecture\n\nThe system uses a three-layer graph for memory. Facts live at L0.\n"
+    )
 
     p1, p2 = _patch_models()
     with p1, p2:
@@ -65,7 +66,9 @@ async def test_add_file_basic(tmp_path):
 
 async def test_add_file_skips_unchanged(tmp_path):
     doc = tmp_path / "notes.md"
-    doc.write_text("## Section\n\nContent that is long enough to pass the minimum chunk size check.\n")
+    doc.write_text(
+        "## Section\n\nContent that is long enough to pass the minimum chunk size check.\n"
+    )
 
     p1, p2 = _patch_models()
     with p1, p2:
@@ -88,7 +91,9 @@ async def test_add_file_reingest_on_change(tmp_path):
             first = await fs.add_file(str(doc))
             assert not first.skipped
 
-            doc.write_text("## Section\n\nUpdated content that has changed significantly from before.\n")
+            doc.write_text(
+                "## Section\n\nUpdated content that has changed significantly from before.\n"
+            )
             second = await fs.add_file(str(doc))
 
     assert not second.skipped
@@ -122,6 +127,7 @@ async def test_add_file_extract_false_no_llm_call(tmp_path):
 
 
 # ── add_directory ──────────────────────────────────────────────────────────
+
 
 async def test_add_directory_multiple_files(tmp_path):
     docs = tmp_path / "docs"
@@ -169,6 +175,7 @@ async def test_add_directory_not_a_dir(tmp_path):
 
 # ── search ─────────────────────────────────────────────────────────────────
 
+
 async def test_search_returns_facts_shape(tmp_path):
     doc = tmp_path / "notes.md"
     doc.write_text("## Memory\n\nVektori stores facts in a three-layer sentence graph system.\n")
@@ -212,9 +219,12 @@ async def test_search_empty_store_returns_empty(tmp_path):
 
 # ── list_files / get_stats / delete_file ──────────────────────────────────
 
+
 async def test_list_files(tmp_path):
     doc = tmp_path / "notes.md"
-    doc.write_text("## Notes\n\nContent that is long enough to pass the minimum chunk requirement.\n")
+    doc.write_text(
+        "## Notes\n\nContent that is long enough to pass the minimum chunk requirement.\n"
+    )
 
     p1, p2 = _patch_models()
     with p1, p2:
@@ -227,7 +237,9 @@ async def test_list_files(tmp_path):
 
 async def test_get_stats(tmp_path):
     doc = tmp_path / "notes.md"
-    doc.write_text("## Notes\n\nContent that is long enough to pass the minimum chunk requirement.\n")
+    doc.write_text(
+        "## Notes\n\nContent that is long enough to pass the minimum chunk requirement.\n"
+    )
 
     p1, p2 = _patch_models()
     with p1, p2:
@@ -242,7 +254,9 @@ async def test_get_stats(tmp_path):
 
 async def test_delete_file_removes_from_index(tmp_path):
     doc = tmp_path / "notes.md"
-    doc.write_text("## Notes\n\nContent that is long enough to pass the minimum chunk requirement.\n")
+    doc.write_text(
+        "## Notes\n\nContent that is long enough to pass the minimum chunk requirement.\n"
+    )
 
     p1, p2 = _patch_models()
     with p1, p2:
@@ -265,6 +279,7 @@ async def test_get_stats_empty(tmp_path):
 
 
 # ── context manager ────────────────────────────────────────────────────────
+
 
 async def test_context_manager_closes_cleanly(tmp_path):
     p1, p2 = _patch_models()

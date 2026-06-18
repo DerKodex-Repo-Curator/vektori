@@ -96,9 +96,15 @@ class DocumentExtractor:
                 if raw.startswith("json"):
                     raw = raw[4:]
             data = json.loads(raw)
-            return [f for f in data.get("facts", []) if isinstance(f.get("text"), str) and f["text"].strip()]
+            return [
+                f
+                for f in data.get("facts", [])
+                if isinstance(f.get("text"), str) and f["text"].strip()
+            ]
         except Exception as e:
-            logger.warning("Fact extraction failed for %s chunk %d: %s", chunk.path, chunk.chunk_index, e)
+            logger.warning(
+                "Fact extraction failed for %s chunk %d: %s", chunk.path, chunk.chunk_index, e
+            )
             return []
 
     async def _is_duplicate(

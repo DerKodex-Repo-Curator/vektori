@@ -34,6 +34,7 @@ def set_interface(name: str) -> None:
     global _interface
     _interface = name
 
+
 _NOTICE = (
     "[vektori] Anonymous usage stats are collected to improve the project. "
     "Opt out: VEKTORI_NO_TELEMETRY=1  "
@@ -61,10 +62,7 @@ def _is_ci() -> bool:
 
 
 def _is_disabled() -> bool:
-    return bool(
-        os.environ.get("VEKTORI_NO_TELEMETRY")
-        or os.environ.get("DO_NOT_TRACK")
-    )
+    return bool(os.environ.get("VEKTORI_NO_TELEMETRY") or os.environ.get("DO_NOT_TRACK"))
 
 
 def _load_cfg() -> dict:
@@ -97,6 +95,7 @@ def _maybe_show_notice() -> None:
         cfg = _load_cfg()
         if not cfg.get("telemetry_notice_shown"):
             import typer
+
             typer.echo(_NOTICE, err=True)
             cfg["telemetry_notice_shown"] = True
             _save_cfg(cfg)
@@ -107,6 +106,7 @@ def _maybe_show_notice() -> None:
 def _pkg_version() -> str:
     try:
         from vektori._version import version
+
         return version
     except Exception:
         return "unknown"
@@ -138,6 +138,7 @@ def capture(event: str, properties: dict[str, Any] | None = None) -> None:
     def _fire() -> None:
         try:
             import httpx
+
             with httpx.Client(timeout=3.0) as client:
                 client.post(f"{_POSTHOG_HOST}/capture/", json=payload)
         except Exception:

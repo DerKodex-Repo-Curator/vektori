@@ -56,8 +56,8 @@ ANSWER:
 
 
 _TYPE3_SCAFFOLD = (
-    "\nNOTE: This is an inference question (\"Would X...?\", \"Is X likely...?\", "
-    "\"What might X...?\"). Step 1: silently list what the context reveals about "
+    '\nNOTE: This is an inference question ("Would X...?", "Is X likely...?", '
+    '"What might X...?"). Step 1: silently list what the context reveals about '
     "the subject's relevant preferences, habits, and situation. Step 2: use that "
     "evidence to commit to a Yes/No answer with a one-sentence justification. "
     "Refusing to answer is only acceptable if the context has zero facts about the subject."
@@ -120,10 +120,16 @@ async def generate_answer(
         # Unwrap JSON-wrapped answers (safety net — should not trigger after json_mode fix)
         try:
             import json as _json
+
             parsed = _json.loads(answer)
             if isinstance(parsed, dict) and "answer" in parsed:
                 answer = str(parsed["answer"]).strip()
-            elif isinstance(parsed, list) and parsed and isinstance(parsed[0], dict) and "answer" in parsed[0]:
+            elif (
+                isinstance(parsed, list)
+                and parsed
+                and isinstance(parsed[0], dict)
+                and "answer" in parsed[0]
+            ):
                 answer = str(parsed[0]["answer"]).strip()
         except Exception:
             # Fallback: regex extraction handles malformed/truncated JSON

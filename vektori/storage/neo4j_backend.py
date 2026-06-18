@@ -380,6 +380,21 @@ class Neo4jBackend(StorageBackend):
         )
         return [_coerce(r) for r in rows]
 
+    async def search_facts_keyword(
+        self,
+        query: str,
+        user_id: str,
+        agent_id: str | None = None,
+        session_id: str | None = None,
+        subject: str | None = None,
+        limit: int = 10,
+        active_only: bool = True,
+        before_date: datetime | None = None,
+        after_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
+        # Neo4j full-text index requires explicit index creation; return empty list for now.
+        return []
+
     async def get_active_facts(
         self,
         user_id: str,

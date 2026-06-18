@@ -78,6 +78,7 @@ class GeminiLLM(LLMProvider):
 
     def _thinking_config(self):
         from google.genai import types
+
         # Explicit override takes priority
         if self._thinking_level is not None:
             if "gemini-2.5" in self.model:
@@ -128,7 +129,16 @@ class GeminiLLM(LLMProvider):
                 error_msg = str(e).lower()
                 is_retryable = any(
                     term in error_msg
-                    for term in ["timeout", "500", "429", "503", "connection", "network", "temporarily", "try again"]
+                    for term in [
+                        "timeout",
+                        "500",
+                        "429",
+                        "503",
+                        "connection",
+                        "network",
+                        "temporarily",
+                        "try again",
+                    ]
                 )
 
                 if not is_retryable or attempt >= self.max_retries:

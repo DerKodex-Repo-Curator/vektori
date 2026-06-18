@@ -597,7 +597,12 @@ def recall(
     qdrant_api_key: str | None = typer.Option(
         None, "--qdrant-api-key", envvar="QDRANT_API_KEY", help=_QDRANT_API_KEY_HELP
     ),
-    synthesize: bool = typer.Option(False, "--synthesize", "-s", help="Use LLM to synthesize retrieved context into a direct answer."),
+    synthesize: bool = typer.Option(
+        False,
+        "--synthesize",
+        "-s",
+        help="Use LLM to synthesize retrieved context into a direct answer.",
+    ),
     as_json: bool = typer.Option(False, "--json", help="Output as JSON."),
 ) -> None:
     """Recall memories. Alias for `search` — reads naturally in agent prompts."""
@@ -654,11 +659,14 @@ def recall(
             f"Be concise and direct. Do not add anything not in the memories.\n\n"
             f"Question: {query}\n\nMemory:\n{context_block}\n\nAnswer:"
         )
+
         async def _synthesize() -> str:
             from vektori.models.factory import create_llm
+
             _silence_litellm()
             llm = create_llm(em)
             return await llm.generate(prompt)
+
         try:
             answer = asyncio.run(_synthesize())
             typer.echo(answer)

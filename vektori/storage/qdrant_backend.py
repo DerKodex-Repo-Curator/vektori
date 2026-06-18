@@ -413,6 +413,21 @@ class QdrantBackend(StorageBackend):
         )
         return [_hit_to_fact(h) for h in hits.points]
 
+    async def search_facts_keyword(
+        self,
+        query: str,
+        user_id: str,
+        agent_id: str | None = None,
+        session_id: str | None = None,
+        subject: str | None = None,
+        limit: int = 10,
+        active_only: bool = True,
+        before_date: datetime | None = None,
+        after_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
+        # Qdrant sparse/BM25 requires a named sparse vector; return empty list for now.
+        return []
+
     async def get_active_facts(
         self,
         user_id: str,

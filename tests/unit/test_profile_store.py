@@ -58,7 +58,9 @@ async def test_sqlite_profile_store_deactivates_old_value_and_keeps_history(tmp_
     assert sum(1 for patch in all_patches if patch.active) == 1
 
 
-async def test_sqlite_profile_store_confirms_same_value_without_duplicate_active_row(tmp_path: Path):
+async def test_sqlite_profile_store_confirms_same_value_without_duplicate_active_row(
+    tmp_path: Path,
+):
     store = SQLiteProfileStore(tmp_path / "profiles.db")
     patch = ProfilePatch(
         key="preferences.units",

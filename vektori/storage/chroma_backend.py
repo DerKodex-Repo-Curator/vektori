@@ -402,6 +402,21 @@ class ChromaBackend(StorageBackend):
 
         return facts
 
+    async def search_facts_keyword(
+        self,
+        query: str,
+        user_id: str,
+        agent_id: str | None = None,
+        session_id: str | None = None,
+        subject: str | None = None,
+        limit: int = 10,
+        active_only: bool = True,
+        before_date: datetime | None = None,
+        after_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
+        # Chroma does not support BM25; return empty list (hybrid caller falls back to vector-only).
+        return []
+
     async def get_active_facts(
         self,
         user_id: str,

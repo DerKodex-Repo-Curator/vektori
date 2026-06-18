@@ -90,6 +90,7 @@ def score_and_rank(
         meta = fact.get("metadata") or {}
         if isinstance(meta, str):
             import json
+
             try:
                 meta = json.loads(meta)
             except Exception:

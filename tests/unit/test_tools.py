@@ -13,6 +13,7 @@ from vektori.tools.memory import MEMORY_TOOLS, handle_tool_call
 
 # — Tool schema tests —
 
+
 def test_memory_tools_has_three_tools():
     names = {t["function"]["name"] for t in MEMORY_TOOLS}
     assert names == {"search_memory", "get_profile", "update_profile"}
@@ -32,6 +33,7 @@ def test_update_profile_schema_required_fields():
 
 
 # — handle_tool_call dispatch —
+
 
 def _make_agent(facts=None):
     memory = AsyncMock()
@@ -72,15 +74,17 @@ async def test_handle_get_profile_with_patches():
     from vektori.memory.profile import ProfilePatch
 
     store = InMemoryProfileStore()
-    await store.save(ProfilePatch(
-        key="preferences.name",
-        value="Alex",
-        reason="user stated",
-        source="explicit_user_request",
-        observer_id="default-agent",
-        observed_id="u1",
-        confidence=0.9,
-    ))
+    await store.save(
+        ProfilePatch(
+            key="preferences.name",
+            value="Alex",
+            reason="user stated",
+            source="explicit_user_request",
+            observer_id="default-agent",
+            observed_id="u1",
+            confidence=0.9,
+        )
+    )
     agent = _make_agent()
     agent.profile_store = store
     result = await handle_tool_call("get_profile", {}, agent)
@@ -110,6 +114,7 @@ async def test_handle_unknown_tool():
 
 # — Agent tool calling loop —
 
+
 def _make_tool_calling_model(first_tool_name: str, tool_args: dict, final_content: str):
     """Mock model that fires one tool call then returns final_content."""
     mock = AsyncMock()
@@ -119,6 +124,7 @@ def _make_tool_calling_model(first_tool_name: str, tool_args: dict, final_conten
     tool_call.function = MagicMock()
     tool_call.function.name = first_tool_name
     import json
+
     tool_call.function.arguments = json.dumps(tool_args)
     tool_call.id = f"call-{first_tool_name}"
 
@@ -140,7 +146,11 @@ def _make_tool_calling_model(first_tool_name: str, tool_args: dict, final_conten
 @pytest.mark.asyncio
 async def test_agent_tool_calling_loop_executes_tool():
     memory = AsyncMock()
-    memory.search.return_value = {"facts": [{"text": "User is a Python developer"}], "sentences": [], "episodes": []}
+    memory.search.return_value = {
+        "facts": [{"text": "User is a Python developer"}],
+        "sentences": [],
+        "episodes": [],
+    }
     memory.add.return_value = {}
 
     model = _make_tool_calling_model(
@@ -211,7 +221,9 @@ async def test_agent_tool_loop_respects_max_round_trips():
     max_trips = 2
     model.complete.side_effect = [looping_result] * max_trips + [final_result]
 
-    config = AgentConfig(enable_tool_calling=True, max_tool_round_trips=max_trips, background_add=False)
+    config = AgentConfig(
+        enable_tool_calling=True, max_tool_round_trips=max_trips, background_add=False
+    )
     agent = VektoriAgent(memory=memory, model=model, user_id="u1", config=config)
 
     result = await agent.chat("keep looping")

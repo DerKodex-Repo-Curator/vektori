@@ -25,7 +25,9 @@ class OpenAICompatibleLLM(LLMProvider):
         timeout: float = 180.0,
     ) -> None:
         self.model = model or DEFAULT_VLLM_MODEL
-        self.base_url = (base_url or os.environ.get("OPENAI_COMPAT_BASE_URL") or DEFAULT_VLLM_BASE_URL).rstrip("/")
+        self.base_url = (
+            base_url or os.environ.get("OPENAI_COMPAT_BASE_URL") or DEFAULT_VLLM_BASE_URL
+        ).rstrip("/")
         self.api_key = api_key or os.environ.get("OPENAI_COMPAT_API_KEY") or "local"
         self.temperature = temperature
         self.timeout = timeout
@@ -81,6 +83,8 @@ class LMStudioLLM(OpenAICompatibleLLM):
     """
 
     def __init__(self, model: str | None = None, **kwargs) -> None:
-        kwargs.setdefault("base_url", os.environ.get("LMSTUDIO_BASE_URL") or DEFAULT_LMSTUDIO_BASE_URL)
+        kwargs.setdefault(
+            "base_url", os.environ.get("LMSTUDIO_BASE_URL") or DEFAULT_LMSTUDIO_BASE_URL
+        )
         kwargs.setdefault("api_key", os.environ.get("LMSTUDIO_API_KEY") or "lm-studio")
         super().__init__(model or DEFAULT_LMSTUDIO_MODEL, **kwargs)

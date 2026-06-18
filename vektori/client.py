@@ -139,11 +139,14 @@ class Vektori:
 
         self._initialized = True
         logger.info("Vektori initialized (backend=%s)", self.config.storage_backend)
-        telemetry.capture("vektori:init", {
-            "backend": self.config.storage_backend,
-            "extraction_provider": telemetry.provider(self.config.extraction_model),
-            "embedding_provider": telemetry.provider(self.config.embedding_model),
-        })
+        telemetry.capture(
+            "vektori:init",
+            {
+                "backend": self.config.storage_backend,
+                "extraction_provider": telemetry.provider(self.config.extraction_model),
+                "embedding_provider": telemetry.provider(self.config.embedding_model),
+            },
+        )
 
     async def add(
         self,
@@ -176,14 +179,22 @@ class Vektori:
         """
         await self._ensure_initialized()
 
-        telemetry.capture("vektori:add", {
-            "backend": self.config.storage_backend,
-            "skip_extraction": skip_extraction,
-            "async_extraction": self.config.async_extraction,
-        })
+        telemetry.capture(
+            "vektori:add",
+            {
+                "backend": self.config.storage_backend,
+                "skip_extraction": skip_extraction,
+                "async_extraction": self.config.async_extraction,
+            },
+        )
 
         result = await self._pipeline.ingest(
-            messages, session_id, user_id, agent_id, metadata, session_time=session_time,
+            messages,
+            session_id,
+            user_id,
+            agent_id,
+            metadata,
+            session_time=session_time,
             skip_extraction=skip_extraction,
         )
 
@@ -233,17 +244,22 @@ class Vektori:
         """
         session_id = f"{source}:{source_id}"
 
-        telemetry.capture("vektori:add_document", {
-            "backend": self.config.storage_backend,
-            "source": source,
-        })
+        telemetry.capture(
+            "vektori:add_document",
+            {
+                "backend": self.config.storage_backend,
+                "source": source,
+            },
+        )
 
         doc_metadata = metadata or {}
-        doc_metadata.update({
-            "source": source,
-            "source_id": source_id,
-            "type": "document",
-        })
+        doc_metadata.update(
+            {
+                "source": source,
+                "source_id": source_id,
+                "type": "document",
+            }
+        )
 
         messages = [{"role": "user", "content": content}]
 
@@ -274,6 +290,7 @@ class Vektori:
             The number of documents/records successfully ingested.
         """
         return await connector.ingest(user_id=user_id, vektori=self, since=since)
+
     async def synthesize(self, user_id: str, agent_id: str | None = None) -> int:
         """
         Run a cross-session synthesis pass for the user.
@@ -323,11 +340,14 @@ class Vektori:
         """
         await self._ensure_initialized()
 
-        telemetry.capture("vektori:search", {
-            "backend": self.config.storage_backend,
-            "depth": depth,
-            "expand": expand,
-        })
+        telemetry.capture(
+            "vektori:search",
+            {
+                "backend": self.config.storage_backend,
+                "depth": depth,
+                "expand": expand,
+            },
+        )
 
         if self.config.enable_retrieval_gate:
             from vektori.retrieval.gate import should_retrieve

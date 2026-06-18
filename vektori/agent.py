@@ -299,11 +299,13 @@ class VektoriAgent:
                 break
 
             # Append assistant's tool-calling turn
-            working_messages.append({
-                "role": "assistant",
-                "content": completion.content or "",
-                "tool_calls": raw_calls,
-            })
+            working_messages.append(
+                {
+                    "role": "assistant",
+                    "content": completion.content or "",
+                    "tool_calls": raw_calls,
+                }
+            )
 
             # Execute each tool and append results
             for call in raw_calls:
@@ -311,21 +313,25 @@ class VektoriAgent:
                 if hasattr(call, "function"):
                     name = call.function.name
                     import json as _json
+
                     args = _json.loads(call.function.arguments or "{}")
                     call_id = getattr(call, "id", name)
                 else:
                     name = call.get("function", {}).get("name", "")
                     import json as _json
+
                     args = _json.loads(call.get("function", {}).get("arguments", "{}"))
                     call_id = call.get("id", name)
 
                 result_text = await handle_tool_call(name, args, self)
                 tool_calls_log.append({"name": name, "args": args, "result": result_text})
-                working_messages.append({
-                    "role": "tool",
-                    "tool_call_id": call_id,
-                    "content": result_text,
-                })
+                working_messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": call_id,
+                        "content": result_text,
+                    }
+                )
 
         assert completion is not None
         return completion, tool_calls_log

@@ -5,6 +5,7 @@ from typing import Any
 try:
     from openclaw_sdk.plugins import OpenClawPlugin, OpenClawTool, hook
 except ImportError:
+
     class OpenClawPlugin:
         pass
 
@@ -13,6 +14,7 @@ except ImportError:
 
     class OpenClawTool:
         pass
+
 
 from vektori import Vektori
 
@@ -38,7 +40,7 @@ class VektoriOpenClawPlugin(OpenClawPlugin):
         await self.memory.add(
             messages=[{"role": message.get("role", "user"), "content": message.get("content", "")}],
             user_id=user_id,
-            session_id=session_id
+            session_id=session_id,
         )
 
     def get_tools(self) -> list:
@@ -46,14 +48,17 @@ class VektoriOpenClawPlugin(OpenClawPlugin):
 
         async def search_vektori(query: str, depth: str = "l1") -> str:
             """Search the Vektori long-term graph memory."""
-            results = await self.memory.search(query=query, user_id="default_openclaw_user", depth=depth)
+            results = await self.memory.search(
+                query=query, user_id="default_openclaw_user", depth=depth
+            )
             output = []
             if results.get("facts"):
                 output.append("Facts:\n" + "\n".join(f"- {f['text']}" for f in results["facts"]))
             if results.get("episodes"):
-                output.append("Insights:\n" + "\n".join(f"- {ep['text']}" for ep in results["episodes"]))
+                output.append(
+                    "Insights:\n" + "\n".join(f"- {ep['text']}" for ep in results["episodes"])
+                )
 
             return "\n\n".join(output) if output else "No relevant memories found."
 
         return [search_vektori]
-

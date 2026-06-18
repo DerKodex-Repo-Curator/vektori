@@ -6,8 +6,10 @@ from typing import Any
 try:
     from hermes_agent.memory.base import BaseMemoryProvider
 except ImportError:
+
     class BaseMemoryProvider:
         pass
+
 
 from vektori import Vektori
 
@@ -25,19 +27,14 @@ class VektoriHermesMemory(BaseMemoryProvider):
     async def add_memory(self, text: str, metadata: dict[str, Any] = None) -> str:
         """Store a new fact/episode from the Hermes agent into Vektori."""
         result = await self.memory.add(
-            messages=[{"role": "user", "content": text}],
-            user_id=self.user_id,
-            metadata=metadata
+            messages=[{"role": "user", "content": text}], user_id=self.user_id, metadata=metadata
         )
-        return result.get('status', 'success')
+        return result.get("status", "success")
 
     async def search_memory(self, query: str, limit: int = 5) -> list[dict[str, Any]]:
         """Retrieve L1 (Facts + Episodes) depth context for Hermes prompt injection."""
         results = await self.memory.search(
-            query=query,
-            user_id=self.user_id,
-            depth="l1",
-            top_k=limit
+            query=query, user_id=self.user_id, depth="l1", top_k=limit
         )
 
         # Hermes usually expects a flat list of memory dicts

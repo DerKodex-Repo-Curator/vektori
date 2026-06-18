@@ -119,7 +119,9 @@ class CloudflareEmbedder(EmbeddingProvider):
                     )
                     logger.warning(
                         "Cloudflare 5xx on attempt %d/%d — retrying in %.1fs",
-                        attempt + 1, max_retries, delay,
+                        attempt + 1,
+                        max_retries,
+                        delay,
                     )
                     await asyncio.sleep(delay)
                     delay *= 2
@@ -131,7 +133,10 @@ class CloudflareEmbedder(EmbeddingProvider):
                 last_error = e
                 logger.warning(
                     "Cloudflare transport error on attempt %d/%d — retrying in %.1fs: %s",
-                    attempt + 1, max_retries, delay, e,
+                    attempt + 1,
+                    max_retries,
+                    delay,
+                    e,
                 )
                 await asyncio.sleep(delay)
                 delay *= 2

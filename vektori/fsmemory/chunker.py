@@ -45,7 +45,9 @@ class DocumentChunker:
             for chunk_text in _split_with_overlap(body):
                 if len(chunk_text) < MIN_CHUNK_CHARS:
                     continue
-                chunks.append(FileChunk(path=path, chunk_index=idx, text=chunk_text, heading=heading))
+                chunks.append(
+                    FileChunk(path=path, chunk_index=idx, text=chunk_text, heading=heading)
+                )
                 idx += 1
         return chunks
 

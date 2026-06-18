@@ -74,9 +74,7 @@ class MessageWindow:
 
         old_messages = self._recent_messages[:-keep_messages]
         kept_messages = self._recent_messages[-keep_messages:]
-        old_text = "\n".join(
-            f"{message['role']}: {message['content']}" for message in old_messages
-        )
+        old_text = "\n".join(f"{message['role']}: {message['content']}" for message in old_messages)
 
         prompt = (
             "Summarize the conversation state in this format:\n"
@@ -129,11 +127,13 @@ class SQLiteWindowStore:
     async def save(self, session_id: str, state: WindowState) -> None:
         await self._ensure_initialized()
         assert self._conn is not None
-        payload = json.dumps({
-            "recent_messages": state.recent_messages,
-            "rolling_summary": state.rolling_summary,
-            "compaction_count": state.compaction_count,
-        })
+        payload = json.dumps(
+            {
+                "recent_messages": state.recent_messages,
+                "rolling_summary": state.rolling_summary,
+                "compaction_count": state.compaction_count,
+            }
+        )
         self._conn.execute(
             """
             INSERT INTO window_snapshots (session_id, payload)
@@ -166,9 +166,7 @@ class SQLiteWindowStore:
     async def delete(self, session_id: str) -> None:
         await self._ensure_initialized()
         assert self._conn is not None
-        self._conn.execute(
-            "DELETE FROM window_snapshots WHERE session_id = ?", (session_id,)
-        )
+        self._conn.execute("DELETE FROM window_snapshots WHERE session_id = ?", (session_id,))
         self._conn.commit()
 
     async def close(self) -> None:

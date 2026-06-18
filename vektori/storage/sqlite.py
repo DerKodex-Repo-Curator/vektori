@@ -734,7 +734,15 @@ class SQLiteBackend(StorageBackend):
         await self._conn.execute(
             """INSERT OR IGNORE INTO episodes (id, text, embedding, user_id, agent_id, session_id, event_time)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (episode_id, text, json.dumps(embedding), user_id, agent_id, session_id, event_time_str),
+            (
+                episode_id,
+                text,
+                json.dumps(embedding),
+                user_id,
+                agent_id,
+                session_id,
+                event_time_str,
+            ),
         )
         await self._conn.commit()
         return episode_id

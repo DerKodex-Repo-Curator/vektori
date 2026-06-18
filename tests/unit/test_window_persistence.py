@@ -12,6 +12,7 @@ from vektori.models.base import ChatCompletionResult
 
 # — SQLiteWindowStore tests —
 
+
 @pytest.mark.asyncio
 async def test_save_and_load_round_trip():
     store = SQLiteWindowStore(":memory:")
@@ -87,6 +88,7 @@ async def test_delete_removes_snapshot():
 
 # — MessageWindow.restore —
 
+
 def test_restore_from_state():
     w = MessageWindow()
     w.add("user", "will be cleared")
@@ -106,6 +108,7 @@ def test_restore_from_state():
 
 
 # — VektoriAgent.save_window / resume_window —
+
 
 def _make_mock_model():
     mock = AsyncMock()

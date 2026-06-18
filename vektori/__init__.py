@@ -10,6 +10,14 @@ except ImportError:
 
 try:
     from vektori.fsmemory import FilesystemMemory
-    __all__ = ["Vektori", "VektoriConfig", "QualityConfig", "ExtractionConfig", "FSMemoryConfig", "FilesystemMemory"]
+
+    __all__ = [
+        "Vektori",
+        "VektoriConfig",
+        "QualityConfig",
+        "ExtractionConfig",
+        "FSMemoryConfig",
+        "FilesystemMemory",
+    ]
 except ImportError:
     __all__ = ["Vektori", "VektoriConfig", "QualityConfig", "ExtractionConfig", "FSMemoryConfig"]

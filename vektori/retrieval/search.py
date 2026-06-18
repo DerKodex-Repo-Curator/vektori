@@ -216,7 +216,9 @@ class SearchPipeline:
                 active_only=not include_superseded,
                 before_date=before_date,
                 after_date=after_date,
-            ) if hasattr(self.db, "search_facts_keyword") else asyncio.sleep(0, result=[]),
+            )
+            if hasattr(self.db, "search_facts_keyword")
+            else asyncio.sleep(0, result=[]),
             self.db.search_sentences(
                 embedding=query_embedding,
                 user_id=user_id,
@@ -249,18 +251,20 @@ class SearchPipeline:
         # Apply dynamic Z-score thresholding + min score floor
         if scored_facts:
             # Compute dynamic cutoff for contextual relevance (TEMPR)
-            raw_scores = [f.get("_score_components", {}).get("similarity", f["score"]) for f in scored_facts]
+            raw_scores = [
+                f.get("_score_components", {}).get("similarity", f["score"]) for f in scored_facts
+            ]
             mean_score = sum(raw_scores) / len(raw_scores)
             if len(raw_scores) > 1:
                 std_score = statistics.stdev(raw_scores)
             else:
                 std_score = 0.0
-                
+
             # Truncate the long tail: keep items within roughly 1 standard deviation of the mean,
             # but never drop below the hard floor (self.min_score).
             dynamic_threshold = mean_score - std_score
             effective_min = max(self.min_score, dynamic_threshold)
-            
+
             scored_facts = [
                 f
                 for f in scored_facts
@@ -310,7 +314,12 @@ class SearchPipeline:
             )
 
         if self.use_ppr and (fact_edges or episode_fact_map):
-            logger.debug("PPR: running on %d fact edges, %d episode nodes, %d total facts", len(fact_edges), len(episode_fact_map), len(all_user_facts))
+            logger.debug(
+                "PPR: running on %d fact edges, %d episode nodes, %d total facts",
+                len(fact_edges),
+                len(episode_fact_map),
+                len(all_user_facts),
+            )
             seed_scores = {
                 f["id"]: f.get("_score_components", {}).get("similarity", f.get("score", 0.0))
                 for f in top_k_facts
@@ -334,7 +343,11 @@ class SearchPipeline:
                 if ppr_scores.get(ep_id, 0) > 0
                 for fid in episode_fact_map.get(ep_id, [])
             ]
-            graph_episodes = await self.db.get_episodes_for_facts(top_fact_ids_from_ppr) if top_fact_ids_from_ppr else []
+            graph_episodes = (
+                await self.db.get_episodes_for_facts(top_fact_ids_from_ppr)
+                if top_fact_ids_from_ppr
+                else []
+            )
 
             if self.debug:
                 logger.debug(
@@ -409,16 +422,18 @@ class SearchPipeline:
         )
 
         if scored_facts:
-            raw_scores = [f.get("_score_components", {}).get("similarity", f["score"]) for f in scored_facts]
+            raw_scores = [
+                f.get("_score_components", {}).get("similarity", f["score"]) for f in scored_facts
+            ]
             mean_score = sum(raw_scores) / len(raw_scores)
             if len(raw_scores) > 1:
                 std_score = statistics.stdev(raw_scores)
             else:
                 std_score = 0.0
-                
+
             dynamic_threshold = mean_score - std_score
             effective_min = max(self.min_score, dynamic_threshold)
-            
+
             scored_facts = [
                 f
                 for f in scored_facts
@@ -438,7 +453,7 @@ class SearchPipeline:
             self.db.get_syntheses_for_facts(top_fact_ids),
             self.db.search_syntheses(query_embedding, user_id, agent_id),
         )
-        
+
         episodes = _merge_unique(graph_episodes, vec_episodes)
         syntheses = _merge_unique(graph_syntheses, vec_syntheses)
 
@@ -559,7 +574,7 @@ class SearchPipeline:
             self.db.search_syntheses(embeddings[0], user_id, agent_id),
             self.db.get_source_sentences(fact_ids),
         )
-        
+
         episodes = _merge_unique(graph_episodes, vec_episodes)
         syntheses = _merge_unique(graph_syntheses, vec_syntheses)
 
@@ -581,7 +596,9 @@ class SearchPipeline:
             "memory_found": len(top_facts) > 0,
         }
 
+
 # ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 def _clean(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Strip internal scoring debug fields before returning to the caller."""
@@ -661,9 +678,7 @@ def _merge_unique(*iterables: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _reciprocal_rank_fusion(
-    vector_results: list[dict[str, Any]],
-    keyword_results: list[dict[str, Any]],
-    k: int = 60
+    vector_results: list[dict[str, Any]], keyword_results: list[dict[str, Any]], k: int = 60
 ) -> list[dict[str, Any]]:
     """
     Reciprocal Rank Fusion (RRF) algorithm to combine vector and BM25 results.
@@ -671,28 +686,28 @@ def _reciprocal_rank_fusion(
     """
     scores: dict[str, float] = {}
     items_map: dict[str, dict[str, Any]] = {}
-    
+
     for rank, item in enumerate(vector_results):
         scores[item["id"]] = scores.get(item["id"], 0.0) + (1.0 / (k + rank))
         items_map[item["id"]] = item
-        
+
     for rank, item in enumerate(keyword_results):
         scores[item["id"]] = scores.get(item["id"], 0.0) + (1.0 / (k + rank))
         if item["id"] not in items_map:
             # We map rank roughly to distance for backwards compatibility
             item["distance"] = 1.0 - (1.0 / (k + rank))
             items_map[item["id"]] = item
-            
+
     # Sort descending by RRF score
     sorted_ids = sorted(scores.keys(), key=lambda i: scores[i], reverse=True)
-    
+
     fused_results = []
     for item_id in sorted_ids:
         # Convert higher RRF score back into a lower 'distance' so scoring processes it efficiently
         item = items_map[item_id]
         item["distance"] = max(0.0, 1.0 - (scores[item_id] * 20))  # arbitrary scaling
         fused_results.append(item)
-        
+
     return fused_results
 
 
@@ -752,9 +767,7 @@ async def _filter_top_sessions(
             session_best_dist[ssid] = sent_dist
 
     max_sessions = 5 if depth == "l2" else 3
-    top_session_ids = sorted(session_best_dist, key=lambda s: session_best_dist[s])[
-        :max_sessions
-    ]
+    top_session_ids = sorted(session_best_dist, key=lambda s: session_best_dist[s])[:max_sessions]
 
     result_sentences: list[dict[str, Any]] = []
     for ssid in top_session_ids:

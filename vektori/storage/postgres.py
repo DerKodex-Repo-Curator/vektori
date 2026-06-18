@@ -130,9 +130,7 @@ class PostgresBackend(StorageBackend):
                 PRIMARY KEY (source_id, target_id)
             )
         """)
-        await conn.execute(
-            "CREATE INDEX IF NOT EXISTS idx_fact_edges_user ON fact_edges (user_id)"
-        )
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_fact_edges_user ON fact_edges (user_id)")
 
     async def close(self) -> None:
         if self._pool:
@@ -362,9 +360,9 @@ class PostgresBackend(StorageBackend):
         after_date: datetime | None = None,
     ) -> list[dict[str, Any]]:
         """BM25/Keyword search over facts using Postgres full-text search.
-        
+
         Uses plainto_tsquery and ts_rank_cd for textual relevance.
-        Returns a faux 'distance' (1.0 - normalized rank) to roughly interface 
+        Returns a faux 'distance' (1.0 - normalized rank) to roughly interface
         with down-stream ranking models, though RRF will overwrite it anyway.
         """
         query = """
@@ -711,7 +709,10 @@ class PostgresBackend(StorageBackend):
                 """INSERT INTO fact_edges (source_id, target_id, user_id, weight)
                    VALUES ($1::uuid, $2::uuid, $3, $4)
                    ON CONFLICT DO NOTHING""",
-                a, b, user_id, weight,
+                a,
+                b,
+                user_id,
+                weight,
             )
 
     async def get_fact_edges_for_user(
@@ -724,7 +725,14 @@ class PostgresBackend(StorageBackend):
                 "SELECT source_id, target_id, weight FROM fact_edges WHERE user_id = $1",
                 user_id,
             )
-        return [{"source_id": str(r["source_id"]), "target_id": str(r["target_id"]), "weight": r["weight"]} for r in rows]
+        return [
+            {
+                "source_id": str(r["source_id"]),
+                "target_id": str(r["target_id"]),
+                "weight": r["weight"],
+            }
+            for r in rows
+        ]
 
     async def get_episode_fact_map(
         self,

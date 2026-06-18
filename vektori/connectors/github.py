@@ -101,7 +101,7 @@ class GitHubConnector(Connector):
                         "author": issue.user.login,
                         "labels": [lbl.name for lbl in issue.labels],
                         "is_pr": issue.pull_request is not None,
-                    }
+                    },
                 )
 
                 count += 1

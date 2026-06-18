@@ -365,6 +365,21 @@ class LanceDBBackend(StorageBackend):
         rows = await self._facts_tbl.vector_search(embedding).where(where).limit(limit).to_list()
         return [_row_to_fact(r) for r in rows]
 
+    async def search_facts_keyword(
+        self,
+        query: str,
+        user_id: str,
+        agent_id: str | None = None,
+        session_id: str | None = None,
+        subject: str | None = None,
+        limit: int = 10,
+        active_only: bool = True,
+        before_date: datetime | None = None,
+        after_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
+        # LanceDB full-text search requires a separate FTS index; return empty list for now.
+        return []
+
     async def get_active_facts(
         self,
         user_id: str,

@@ -63,7 +63,9 @@ class FSStore:
             row = await cursor.fetchone()
         return row["content_hash"] if row else None
 
-    async def set_file_index(self, path: str, user_id: str, content_hash: str, fact_count: int) -> None:
+    async def set_file_index(
+        self, path: str, user_id: str, content_hash: str, fact_count: int
+    ) -> None:
         await self._conn.execute(
             """INSERT INTO fs_file_index (path, user_id, content_hash, fact_count)
                VALUES (?, ?, ?, ?)

@@ -45,24 +45,9 @@ class AgentContextLoader:
                     cwd / "vektori.yml",
                 ]
             )
-            candidates.extend(
-                [
-                    path / "agents.md"
-                    for path in [*cwd.parents][:3]
-                ]
-            )
-            candidates.extend(
-                [
-                    path / "vektori.yaml"
-                    for path in [*cwd.parents][:3]
-                ]
-            )
-            candidates.extend(
-                [
-                    path / "vektori.yml"
-                    for path in [*cwd.parents][:3]
-                ]
-            )
+            candidates.extend([path / "agents.md" for path in [*cwd.parents][:3]])
+            candidates.extend([path / "vektori.yaml" for path in [*cwd.parents][:3]])
+            candidates.extend([path / "vektori.yml" for path in [*cwd.parents][:3]])
 
         for candidate in candidates:
             if candidate.exists():

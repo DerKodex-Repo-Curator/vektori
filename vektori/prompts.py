@@ -17,9 +17,7 @@ def estimate_tokens_for_text(text: str) -> int:
 
 def estimate_tokens_for_messages(messages: list[dict[str, str]]) -> int:
     """Rough token estimate for a chat message list."""
-    return sum(
-        estimate_tokens_for_text(message.get("content", "")) + 4 for message in messages
-    )
+    return sum(estimate_tokens_for_text(message.get("content", "")) + 4 for message in messages)
 
 
 @dataclass
@@ -61,11 +59,15 @@ def render_retrieved_memory(memories: dict[str, list[dict[str, Any]]]) -> str:
         blocks.extend(f"- {fact.get('text', '').strip()}" for fact in facts if fact.get("text"))
     if episodes:
         blocks.append("\nEpisodes")
-        blocks.extend(f"- {episode.get('text', '').strip()}" for episode in episodes if episode.get("text"))
+        blocks.extend(
+            f"- {episode.get('text', '').strip()}" for episode in episodes if episode.get("text")
+        )
     if sentences:
         blocks.append("\nSentences")
         blocks.extend(
-            f"- {sentence.get('text', '').strip()}" for sentence in sentences if sentence.get("text")
+            f"- {sentence.get('text', '').strip()}"
+            for sentence in sentences
+            if sentence.get("text")
         )
     return "\n".join(blocks).strip() if len(blocks) > 1 else ""
 

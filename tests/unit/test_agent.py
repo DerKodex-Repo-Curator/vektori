@@ -113,6 +113,7 @@ async def test_chat_background_add_called():
 
     await agent.chat("remember I like cats")
     import asyncio
+
     await asyncio.sleep(0)
     if agent._background_tasks:
         await asyncio.gather(*list(agent._background_tasks), return_exceptions=True)

@@ -292,6 +292,43 @@ class VecLiteBackend(StorageBackend):
             vec_k *= 2
         return results
 
+    async def search_facts_keyword(
+        self,
+        query: str,
+        user_id: str,
+        agent_id: str | None = None,
+        session_id: str | None = None,
+        subject: str | None = None,
+        limit: int = 10,
+        active_only: bool = True,
+        before_date: datetime | None = None,
+        after_date: datetime | None = None,
+    ) -> list[dict[str, Any]]:
+        q = query.lower()
+        results = []
+        for f in self._facts.values():
+            if f.get("user_id") != user_id:
+                continue
+            if agent_id and f.get("agent_id") != agent_id:
+                continue
+            if session_id and f.get("session_id") != session_id:
+                continue
+            if subject and f.get("subject") != subject:
+                continue
+            if active_only and not f.get("is_active", True):
+                continue
+            if q not in f.get("text", "").lower():
+                continue
+            et = f.get("event_time")
+            if before_date and (et is None or et > before_date):
+                continue
+            if after_date and (et is None or et < after_date):
+                continue
+            results.append({**f, "distance": 0.5})
+            if len(results) >= limit:
+                break
+        return results
+
     async def get_active_facts(
         self,
         user_id: str,
