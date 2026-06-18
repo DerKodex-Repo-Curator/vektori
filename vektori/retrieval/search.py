@@ -194,6 +194,7 @@ class SearchPipeline:
         # ── Step 1: Parallel — facts AND sentences ────────────────────────────
         # Run vector search, keyword search, and sentence search concurrently.
         # Vector and keyword searches are fused via RRF to enable Hybrid Search.
+        _temporal_active = before_date is not None or after_date is not None
         seed_facts_vec, seed_facts_kw, direct_sentences = await asyncio.gather(
             self.db.search_facts(
                 embedding=query_embedding,
@@ -205,6 +206,7 @@ class SearchPipeline:
                 active_only=not include_superseded,
                 before_date=before_date,
                 after_date=after_date,
+                include_undated=not _temporal_active,
             ),
             self.db.search_facts_keyword(
                 query_text=query_text,

@@ -126,10 +126,13 @@ class StorageBackend(ABC):
         active_only: bool = True,
         before_date: datetime | None = None,
         after_date: datetime | None = None,
+        include_undated: bool = True,
     ) -> list[dict[str, Any]]:
         """Vector search over facts. Results include a 'distance' field (cosine distance).
         subject: pre-filter to facts about this entity before the vector scan.
-        before_date/after_date: filter by event_time for temporal queries."""
+        before_date/after_date: filter by event_time for temporal queries.
+        include_undated: when False, facts with no event_time are excluded (used when
+        temporal filters are active to prevent undated facts from polluting results)."""
         ...
 
     @abstractmethod

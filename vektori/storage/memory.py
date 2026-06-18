@@ -180,6 +180,7 @@ class MemoryBackend(StorageBackend):
         active_only: bool = True,
         before_date: datetime | None = None,
         after_date: datetime | None = None,
+        include_undated: bool = True,
     ) -> list[dict[str, Any]]:
         results = []
         for f in self._facts.values():
@@ -196,6 +197,8 @@ class MemoryBackend(StorageBackend):
             if f.get("embedding") is None:
                 continue
             et = f.get("event_time")
+            if not et and not include_undated:
+                continue
             if before_date and et and et > before_date:
                 continue
             if after_date and et and et < after_date:
