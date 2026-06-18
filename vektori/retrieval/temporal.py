@@ -7,7 +7,7 @@ Design:
 - Regex-based, no external dependencies, fast.
 - Returns a TemporalWindow (after_date, before_date) or None if no signal found.
 - Reference date defaults to current UTC time (naive datetime); override for deterministic testing.
-- "recently" / "lately" → 7-day window (conservative, avoids false negatives).
+- "recently" / "lately" → 30-day window (long-term memory context makes a month more natural).
 - Relative expressions ("last N days") anchor to reference_date.
 - Explicit year/month expressions ("in January", "in 2023") produce month/year ranges.
 - Unknown or ambiguous expressions return None (no filter applied — safe fallback).
@@ -170,7 +170,7 @@ class TemporalQueryParser:
         m = _AFTER_YEAR.search(query)
         if m:
             year = int(m.group(1))
-            return TemporalWindow(after_date=datetime(year, 12, 31))
+            return TemporalWindow(after_date=datetime(year + 1, 1, 1))
 
         # "in [year]"
         m = _IN_YEAR.search(query)
@@ -187,7 +187,7 @@ class TemporalQueryParser:
             month_name = m.group(1).lower()
             month_num = _MONTHS.get(month_name)
             if month_num:
-                year = ref.year if ref.month >= month_num else ref.year - 1
+                year = ref.year
                 # Window: entire month
                 start = datetime(year, month_num, 1)
                 # End: first day of next month minus 1 second
